@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="weather-side">
+          <div class="weather-gradient"></div>
+          <div class="date-container">
+            <h2 class="date-dayname">Tuesday</h2><span class="date-day">15 Jan 2019</span><i class="location-icon" data-feather="map-pin"></i><span class="location">Paris, FR</span>
+          </div>
+          <div class="weather-container"><i class="weather-icon" data-feather="sun"></i>
+            <h1 class="weather-temp">29°C</h1>
+            <h3 class="weather-desc">Sunny</h3>
+          </div>
+        </div>
+        <div class="info-side">
+          <div class="today-info-container">
+            <div class="today-info">
+              <div class="precipitation"> <span class="title">PRESSURE</span><span class="PRESSURE value">0 %</span>
+                <div class="clear"></div>
+              </div>
+              <div class="humidity"> <span class="title">HUMIDITY</span><span class="humidity-view">34 %</span>
+                <div class="clear"></div>
+              </div>
+              <div class="wind"> <span class="title">WIND</span><span class="wind-view">0 km/h</span>
+                <div class="clear"></div>
+              </div>
+            </div>
+          </div>
+          <div class="week-container">
+            <ul class="week-list">
+              <li class="active"><i class="day-icon" data-feather="sun"></i><span class="day-name">Tue</span><span class="day-temp">29°C</span></li>
+              <li><i class="day-icon" data-feather="cloud"></i><span class="day-name">Wed</span><span class="day-temp">21°C</span></li>
+              <li><i class="day-icon" data-feather="cloud-snow"></i><span class="day-name">Thu</span><span class="day-temp">08°C</span></li>
+              <li><i class="day-icon" data-feather="cloud-rain"></i><span class="day-name">Fry</span><span class="day-temp">19°C</span></li>
+              <div class="clear"></div>
+            </ul>
+          </div>
+          <div class="location-container">
+            <!-- <button class="location-button"> <i data-feather="map-pin"></i><span>Change location</span></button> -->
+            <select class="location-button listcity" >
+                <option value="Amman"> Amman </option>
+                <option value="Paris" selected> Paris </option>
+                <option value="London"> london </option>
+            </select>
+          </div>
+        </div>
+      </div>
+    <script >
+       document.addEventListener('DOMContentLoaded', function () {
+            const API_KEY = '1f5a3f0a6dcf2044078987c71bc82fbe';
+            const cities = {
+                'Amman': 'Amman,JO',
+                'Paris': 'Paris,FR',
+                'London': 'London,GB'
+            };
+
+            const locationSelect = document.querySelector('.listcity');
+            locationSelect.addEventListener('change', () => {
+                const city = cities[locationSelect.value];
+                fetchWeather(city);
+            });
+
+            function fetchWeather(city) {
+                fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`)
+                    .then(response => response.json())
+                    .then(data => updateWeather(data))
+                    .catch(error => console.error('Error fetching the weather data:', error));
+            }
+
+            function updateWeather(data) {
+                const dateContainer = document.querySelector('.date-container');
+                const weatherContainer = document.querySelector('.weather-container');
+                const infoContainer = document.querySelector('.today-info-container');
+
+                const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const now = new Date();
+
+                dateContainer.querySelector('.date-dayname').textContent = dayNames[now.getDay()];
+                dateContainer.querySelector('.date-day').textContent = now.toLocaleDateString();
+                dateContainer.querySelector('.location').textContent = `${data.name}, ${data.sys.country}`;
+
+                weatherContainer.querySelector('.weather-icon').setAttribute('data-feather', getWeatherIcon(data.weather[0].icon));
+                weatherContainer.querySelector('.weather-temp').textContent = `${Math.round(data.main.temp)}°C`;
+                weatherContainer.querySelector('.weather-desc').textContent = data.weather[0].description;
+
+                infoContainer.querySelector('.pressure-value').textContent = `${data.main.pressure} hPa`;
+                infoContainer.querySelector('.humidity-view').textContent = `${data.main.humidity} %`;
+                infoContainer.querySelector('.wind-view').textContent = `${data.wind.speed} km/h`;
+
+                feather.replace();
+            }
+
+            function getWeatherIcon(icon) {
+                const iconMap = {
+                    '01d': 'sun',
+                    '01n': 'moon',
+                    '02d': 'cloud-sun',
+                    '02n': 'cloud-moon',
+                    '03d': 'cloud',
+                    '03n': 'cloud',
+                    '04d': 'cloud',
+                    '04n': 'cloud',
+                    '09d': 'cloud-drizzle',
+                    '09n': 'cloud-drizzle',
+                    '10d': 'cloud-rain',
+                    '10n': 'cloud-rain',
+                    '11d': 'cloud-lightning',
+                    '11n': 'cloud-lightning',
+                    '13d': 'cloud-snow',
+                    '13n': 'cloud-snow',
+                    '50d': 'wind',
+                    '50n': 'wind'
+                };
+                return iconMap[icon] || 'sun';
+            }
+
+            
+            fetchWeather(cities[locationSelect.value]);
+        });
+    </script>
+    
+</body>
+</html>
